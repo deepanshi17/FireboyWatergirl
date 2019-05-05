@@ -26,14 +26,16 @@
 #include "../inc/tm4c123gh6pm.h"
 
 void (*PeriodicTask0)(void); 
+void DisableInterrupts(void); // Disable interrupts
+void EnableInterrupts(void);  // Enable interrupts
 
 // ***************** Timer0_Init ****************
 // Activate TIMER0 interrupts to run user task periodically
 // Inputs:  task is a pointer to a user function
 //          period in units (1/clockfreq)
 // Outputs: none
-void Timer0_Init(void(*task)(void), uint32_t period){
-  SYSCTL_RCGCTIMER_R |= 0x01;   // 0) activate TIMER0
+void Timer0_Init(void(*task)(void), uint32_t period){ volatile int delay; 
+  SYSCTL_RCGCTIMER_R |= 0x01;   // 0) activate TIMER0 
   PeriodicTask0 = task;          // user function
   TIMER0_CTL_R = 0x00000000;    // 1) disable TIMER0A during setup
   TIMER0_CFG_R = 0x00000000;    // 2) configure for 32-bit mode
@@ -47,6 +49,7 @@ void Timer0_Init(void(*task)(void), uint32_t period){
 // vector number 35, interrupt number 19
   NVIC_EN0_R = 1<<19;           // 9) enable IRQ 19 in NVIC
   TIMER0_CTL_R = 0x00000001;    // 10) enable TIMER0A
+	EnableInterrupts(); 
 }
 
 void Timer0A_Handler(void){

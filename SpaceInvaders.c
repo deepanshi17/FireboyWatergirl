@@ -1,9 +1,30 @@
-// FireboyWatergirl.c
+// SpaceInvaders.c
 // Runs on LM4F120/TM4C123
 // Jonathan Valvano and Daniel Valvano
 // This is a starter project for the EE319K Lab 10
 
-// Last Modified: 5/2/2019
+// Last Modified: 11/20/2018 
+// http://www.spaceinvaders.de/
+// sounds at http://www.classicgaming.cc/classics/spaceinvaders/sounds.php
+// http://www.classicgaming.cc/classics/spaceinvaders/playguide.php
+/* This example accompanies the books
+   "Embedded Systems: Real Time Interfacing to Arm Cortex M Microcontrollers",
+   ISBN: 978-1463590154, Jonathan Valvano, copyright (c) 2018
+
+   "Embedded Systems: Introduction to Arm Cortex M Microcontrollers",
+   ISBN: 978-1469998749, Jonathan Valvano, copyright (c) 2018
+
+ Copyright 2018 by Jonathan W. Valvano, valvano@mail.utexas.edu
+    You may use, edit, run or distribute this file
+    as long as the above copyright notice remains
+ THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+ VALVANO SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
+ OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ For more information about my classes, my research, and my books, see
+ http://users.ece.utexas.edu/~valvano/
+ */
 // ******* Possible Hardware I/O connections*******************
 // Slide pot pin 1 connected to ground
 // Slide pot pin 2 connected to PD2/AIN5
@@ -38,38 +59,80 @@
 #include "Sound.h"
 #include "Timer0.h"
 #include "Timer1.h"
+#include "DAC.h" 
 
+#define period (7256)
 
-#define	G (6378)
-#define	D (8503)
-#define A (5682)
+char *tune; 
+uint32_t tuneLength; 
 
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
 void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
+
+
+void PortFInit (void) {
+		
+	SYSCTL_RCGCGPIO_R |= 0x20;
+	volatile int delay;
+	delay = 0 ;
+	GPIO_PORTF_DIR_R |= 0x08;
+	GPIO_PORTF_DEN_R |= 0x08;
+	
+}
+//*****ButtonsInit*****// 
+// Initializes PE0, PE1 as buttons // 
+void ButtonsInit(void){ volatile int delay; 
+	SYSCTL_RCGCGPIO_R |= 0x10; // enable clock for PORT E
+	delay = 0; // let clock run 
+	GPIO_PORTE_DIR_R &= ~0x03; // inputs on PORTE
+	GPIO_PORTE_DEN_R |= 0x03; // enable 
+} 
+
 int main(void){
   PLL_Init(Bus80MHz);       // Bus clock is 80 MHz 
-  Random_Init(1);
 	
+//  Random_Init(1);					// do we need this??? I think its just space invaders but double check LOL 
+	
+	PortFInit() ; 
 	Sound_Init(); 						// initializes sound (& DAC as well) 
-
-  Output_Init();
-  ST7735_FillScreen(0x0000);            // set screen to black
+	ButtonsInit(); 
+ 
+//  Output_Init();
+//  ST7735_FillScreen(0x0000);            // set screen to black
+	
+	uint32_t button = 0; 
+	uint32_t lastbutton = 0; 
+	uint32_t heartbeat_counter=655355	; 
+	
+  
+	
+	
   while(1){
-		
-//		PlayGrunt(); 
-//		PlayTing(); 
-//		
+		 button = (GPIO_PORTE_DATA_R & 0x03); 
+		if ((button == 1) && (lastbutton == 0)) {
+			Timer1_Init(&PlayBackgroundMusic,period) ; 
+		} 
+		else if ((button == 2) && (lastbutton == 0) ) {
+			PlayTing(); 
+		} else if ( button == lastbutton) {
+			
+		} else {
+			Timer0_Init((&PlaySineWave), 0); 
+		} 
+			
+			lastbutton = button ; 
+			heartbeat_counter--; 
+			if (heartbeat_counter == 0) {
+				GPIO_PORTF_DATA_R ^= 0x08;
+			heartbeat_counter = 655355;
+			}
   }
 
 }
 
-void SysTick_Handler(void){
-	
-	
-	
-}
+
 
 
 

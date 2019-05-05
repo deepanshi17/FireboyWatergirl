@@ -19,6 +19,7 @@ void Dac_Init (void) {
 }
 
 void DAC_Out (uint32_t data) {
+	GPIO_PORTF_DATA_R ^= 0x08; 
 	GPIO_PORTB_DATA_R = (data & 0x0F); 
 	
 }
