@@ -53,6 +53,7 @@
 #include "../inc/tm4c123gh6pm.h"
 #include "ST7735.h"
 #include "Random.h"
+#include "TExaS.h"  
 #include "PLL.h"
 #include "ADC.h"
 #include "Images.h"
@@ -61,6 +62,7 @@
 #include "Timer1.h"
 #include "DAC.h" 
 #include "Print.h" 
+
 
 #define period (7256)
 #define A (5682)
@@ -124,27 +126,27 @@ uint32_t Convert(uint32_t input){
 }
 
 int main(void){
-  PLL_Init(Bus80MHz);       // Bus clock is 80 MHz 
+	PLL_Init(Bus80MHz);       // Bus clock is 80 MHz 
 	PortFInit() ; 
-//	SysTick_Init();
-//	ADC_Init();
+	SysTick_Init();
+	ADC_Init();
 	ST7735_InitR(INITR_REDTAB);
-	EnableInterrupts(); 
-
-
+ 
 	Sound_Init(); 						// initializes sound (& DAC as well) 
 	ButtonsInit(); 
  
 	uint32_t button = 0; 
 	uint32_t lastbutton = 0;
 
-	
 //  Output_Init();
-	ST7735_FillScreen(0x0000);            // set screen to black
-	
+// ST7735_FillScreen(0x0000);            // set screen to black
+//	
 	Timer1_Init(&PlayBackgroundMusic, A); 
 	EnableInterrupts(); 
-		
+//	
+//	ST7735_FillScreen(0x0000); 
+//	ST7735_DrawBitmap(64, 80, Firegirl, 17, 35);  
+	
 	
   while(1){
 		
@@ -152,15 +154,15 @@ int main(void){
 //		Position = Convert(Data); 
 //		ST7735_SetCursor(0,0); 
 		
-//	while(ADCStatus==1){
-//		signal = ADCMail;
-//		ADCStatus=0;
-//		signal = Convert(signal);
-//		ST7735_OutString("    "); 
-//    ST7735_SetCursor(6,0);
-//		LCD_OutFix(signal);
-//		ST7735_OutString(ptr); 
-//	} 
+	if(ADCStatus==1){
+		signal = ADCMail;
+		ADCStatus=0;
+		signal = Convert(signal);
+		ST7735_OutString("    "); 
+    ST7735_SetCursor(6,0);
+		LCD_OutFix(signal);
+		ST7735_OutString(ptr); 
+	} 
 		// button interrupts ///					
 		 button = (GPIO_PORTE_DATA_R & 0x03); 
 		if (((button == 1) && (lastbutton == 0)) || ((button == 2) && (lastbutton == 0)))	// either button pressed 

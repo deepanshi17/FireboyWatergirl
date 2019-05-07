@@ -20,17 +20,28 @@ void ADC_Init(void){ volatile int delay;
 //*** students write this ******
 	SYSCTL_RCGCGPIO_R |= 0x08 ; 		// enable Port D 
 	delay = 0; 
+	delay =0;
+	delay=0;
+	delay=0;
+	delay=0;
 	GPIO_PORTD_DIR_R &= ~0x04	; 		// Port D is input 
 	GPIO_PORTD_AFSEL_R |= 0x04; 		
 	GPIO_PORTD_DEN_R &= ~0x04	;			// disable Port D digital 
 	GPIO_PORTD_AMSEL_R |= 0x04; 		// enable analog 
 	
 	SYSCTL_RCGCADC_R |= 0x01	; 		// enable	ADC clock 
-	delay = 0; 											// stabilize 
-	delay = 0; 
-	delay = 0; 
-	delay = 0; 
-	delay = 0; 
+	delay = 1; 
+	delay = 2; 
+	delay = 3; 
+	delay = 4; 
+	delay = 5; 
+	delay = 6; 
+	delay = 7; 
+	delay = 8;
+	delay = 9; 
+	delay = 10; 
+	delay = 11; 
+	delay = 12;
 	ADC0_PC_R |= 0x01; 							// 125k HZ priority 
 	ADC0_SSPRI_R = 0x0123; 				// seq3 is highest priority 
 	ADC0_ACTSS_R &= ~0x08;					// disable seq3 
