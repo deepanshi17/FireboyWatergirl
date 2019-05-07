@@ -219,10 +219,9 @@ ARM Macro Assembler    Page 4
   168 00000110                 END                          ; end of file
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4 --apcs=interw
 ork --depend=.\print.d -o.\print.o -I.\RTE\_SpaceInvaders -IC:\Keil_v5\ARM\PACK
-\ARM\CMSIS\5.5.1\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\TM4C_DFP\1.1.0\D
-evice\Include\TM4C123 --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSIO
-N SETA 526" --predefine="_RTE_ SETA 1" --predefine="TM4C123GH6PM SETA 1" --list
-=.\print.lst Print.s
+\ARM\CMSIS\5.4.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\TM4C_DFP\1.1.0\D
+evice\Include\TM4C123 --predefine="__UVISION_VERSION SETA 526" --predefine="_RT
+E_ SETA 1" --predefine="TM4C123GH6PM SETA 1" --list=.\print.lst Print.s
 
 
 
@@ -354,4 +353,4 @@ Symbol: ST7735_OutString
       None
 Comment: ST7735_OutString unused
 2 symbols
-345 symbols in table
+344 symbols in table

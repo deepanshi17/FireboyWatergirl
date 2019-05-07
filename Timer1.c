@@ -34,8 +34,6 @@ void (*PeriodicTask1)(void);   // user function
 // Outputs: none
 void Timer1_Init(void(*task)(void), uint32_t period){ volatile int delay; 
   SYSCTL_RCGCTIMER_R |= 0x02;   // 0) activate TIMER1
-	delay = 0; 
-	delay = 0; 
   PeriodicTask1 = task;          // user function
   TIMER1_CTL_R = 0x00000000;    // 1) disable TIMER1A during setup
   TIMER1_CFG_R = 0x00000000;    // 2) configure for 32-bit mode

@@ -53,6 +53,7 @@
 #include "../inc/tm4c123gh6pm.h"
 #include "ST7735.h"
 #include "Random.h"
+#include "TExaS.h"  
 #include "PLL.h"
 #include "ADC.h"
 #include "Images.h"
@@ -60,26 +61,56 @@
 #include "Timer0.h"
 #include "Timer1.h"
 #include "DAC.h" 
+#include "Print.h" 
+
 
 #define period (7256)
+#define A (5682)
+#define PF1       (*((volatile uint32_t *)0x40025008))
+#define PF2       (*((volatile uint32_t *)0x40025010))
+#define PF3       (*((volatile uint32_t *)0x40025020))
 
-char *tune; 
-uint32_t tuneLength; 
+uint32_t signal=0;
+uint32_t ADCMail=0;
+int ADCStatus=0;
+char units[] = " cm";
+char *ptr = &units[0];
+uint32_t Data;        // 12-bit ADC
+uint32_t Position;    // 32-bit fixed-point 0.001 cm
+uint32_t OldPosition = 0; 
 
 void DisableInterrupts(void); // Disable interrupts
 void EnableInterrupts(void);  // Enable interrupts
-void Delay100ms(uint32_t count); // time delay in 0.1 seconds
 
 
+void SysTick_Init(void){
+	NVIC_ST_CTRL_R = 0; 						
+	NVIC_ST_RELOAD_R = 666800; 
+	NVIC_ST_CURRENT_R = 0; 
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R & 0x00FFFFFF) | 0x20000000;
+	NVIC_ST_CTRL_R = 0x07; 
+}
 
-void PortFInit (void) {
-		
-	SYSCTL_RCGCGPIO_R |= 0x20;
-	volatile int delay;
-	delay = 0 ;
-	GPIO_PORTF_DIR_R |= 0x08;
-	GPIO_PORTF_DEN_R |= 0x08;
+void SysTick_Handler(void){
+	PF2 ^= 0x04;      // Heartbeat
+	PF2 ^= 0x04;      // Heartbeat
+	ADCMail = ADC_In();
+	ADCStatus=1;
+	PF2 ^= 0x04;      // Heartbeat
+}
+//***PortFInit***// 
+// initializes PortF LEDs to work as heartbeats // 
+// PF1 LED - for music interrupts (timers)			// 
+// PF2 LED - for ADC interrupt	(systick)				// 					
+void PortFInit (void) { volatile int delay; 
 	
+	SYSCTL_RCGCGPIO_R |= 0x20; // clock for PORT F
+	delay = 0; 
+	GPIO_PORTF_LOCK_R = GPIO_LOCK_KEY ; 
+	GPIO_PORTF_CR_R |= 0xFF	;
+	GPIO_PORTF_DIR_R |= 0x0E; //output LED PF123
+	GPIO_PORTF_DEN_R |= 0x0E; // enable PF1, PF2, PF3 
+
 }
 //*****ButtonsInit*****// 
 // Initializes PE0, PE1 as buttons // 
@@ -90,44 +121,67 @@ void ButtonsInit(void){ volatile int delay;
 	GPIO_PORTE_DEN_R |= 0x03; // enable 
 } 
 
+uint32_t Convert(uint32_t input){
+	Position = ((0.0295*input)); 
+  return(Position);
+}
+
 int main(void){
-  PLL_Init(Bus80MHz);       // Bus clock is 80 MHz 
-	
-//  Random_Init(1);					// do we need this??? I think its just space invaders but double check LOL 
-	
+	PLL_Init(Bus80MHz);       // Bus clock is 80 MHz 
 	PortFInit() ; 
+	SysTick_Init();
+	ADC_Init();
+	ST7735_InitR(INITR_REDTAB);
+ 
 	Sound_Init(); 						// initializes sound (& DAC as well) 
 	ButtonsInit(); 
  
-//  Output_Init();
-//  ST7735_FillScreen(0x0000);            // set screen to black
-	
 	uint32_t button = 0; 
-	uint32_t lastbutton = 0; 
-	uint32_t heartbeat_counter=655355	; 
-	
-  
-	
-	
-  while(1){
+	uint32_t lastbutton = 0;
+
+//  Output_Init();
+// ST7735_FillScreen(0x0000);            // set screen to black
+//	
+	Timer1_Init(&PlayBackgroundMusic, A); 
+	EnableInterrupts(); 
+//	
+	ST7735_FillScreen(0x0000); 
+ 	
+  while(1){	
+	if(ADCStatus==1){
+//		PF2 = 0x04;       // Profile ADC
+//    Data = ADC_In();  // sample 12-bit channel 5
+//    PF2 = 0x00;       // end of ADC Profile
+//    ST7735_SetCursor(0,0);
+//    PF1 = 0x02;       // Profile LCD
+//    LCD_OutDec(Data); 
+//    ST7735_OutString("    ");  // spaces cover up characters from last output
+//    PF1 = 0; 
+			signal = ADCMail;
+			ADCStatus = 0; 
+			Data = ADC_In(); 	// obtain horizontal motion data from ADC (x)
+			Position = Convert(Data); 
+			ST7735_SetCursor(0,0); 
+			ST7735_DrawBitmap(OldPosition, 80, EraseSprite, 10, 20);
+			ST7735_DrawBitmap(Position, 80, Fire2, 10, 20);
+
+			OldPosition = Position; 
+	} 
+		// button interrupts ///					
 		 button = (GPIO_PORTE_DATA_R & 0x03); 
-		if ((button == 1) && (lastbutton == 0)) {
-			Timer1_Init(&PlayBackgroundMusic,period) ; 
-		} 
-		else if ((button == 2) && (lastbutton == 0) ) {
-			PlayTing(); 
-		} else if ( button == lastbutton) {
+
+		 if (((button == 1) && (lastbutton == 0)) || ((button == 2) && (lastbutton == 0)))// either button pressed 
+			{
+			TIMER1_CTL_R = 0x00000000; 								// disable Timer1
+			PlayGrunt();
+		}
+		 else if ( button == lastbutton) {} 				// no buttons pressed  
+			else {
+					PlayNothing(); 
+					TIMER1_CTL_R = 0x00000001;
+			} 
+		lastbutton = button ; 
 			
-		} else {
-			Timer0_Init((&PlaySineWave), 0); 
-		} 
-			
-			lastbutton = button ; 
-			heartbeat_counter--; 
-			if (heartbeat_counter == 0) {
-				GPIO_PORTF_DATA_R ^= 0x08;
-			heartbeat_counter = 655355;
-			}
   }
 
 }
