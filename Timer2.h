@@ -1,15 +1,16 @@
-// Timer0.h
+// Timer2.h
 // Runs on LM4F120/TM4C123
-// Use Timer0 in 32-bit periodic mode to request interrupts at a periodic rate
+// Use Timer1 in 32-bit periodic mode to request interrupts at a periodic rate
 // Daniel Valvano
-// March 20, 2014
+// May 5, 2015
+
 
 /* This example accompanies the book
    "Embedded Systems: Real Time Interfacing to Arm Cortex M Microcontrollers",
-   ISBN: 978-1463590154, Jonathan Valvano, copyright (c) 2013
+   ISBN: 978-1463590154, Jonathan Valvano, copyright (c) 2015
   Program 7.5, example 7.6
 
- Copyright 2013 by Jonathan W. Valvano, valvano@mail.utexas.edu
+ Copyright 2015 by Jonathan W. Valvano, valvano@mail.utexas.edu
     You may use, edit, run or distribute this file
     as long as the above copyright notice remains
  THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
@@ -21,16 +22,14 @@
  http://users.ece.utexas.edu/~valvano/
  */
 
-#ifndef __TIMER0INTS_H__ // do not include more than once
-#define __TIMER0INTS_H__
-#include <stdint.h> 
+#ifndef __TIMER2INTS_H__ // do not include more than once
+#define __TIMER2INTS_H__
 
-// ***************** Timer0_Init ****************
-// Activate Timer0 interrupts to run user task periodically
+// ***************** Timer2_Init ****************
+// Activate Timer2 interrupts to run user task periodically
 // Inputs:  task is a pointer to a user function
 //          period in units (1/clockfreq)
 // Outputs: none
-void Timer0_Init(void(*task)(void), uint32_t period);
-void Timer0A_Handler (void); 
-#endif // __TIMER2INTS_H__
+void Timer2_Init(void(*task)(void), uint32_t period);
 
+#endif // __TIMER2INTS_H__

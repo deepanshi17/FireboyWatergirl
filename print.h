@@ -1,11 +1,10 @@
 // print.h
 // Runs on LM4F120/TM4C123
-// Use SSI0 to send an 8-bit code to the ST7735R
+// Use SSI0 to send an 8-bit code to the Nokia5110 48x84
 // pixel LCD to display text, images, or other information.
 // Daniel Valvano
-// November 14, 2018
+// October 20, 2014
 
-#include <stdint.h>
 
 //-----------------------LCD_OutDec-----------------------
 // Output a 32-bit number in unsigned decimal format

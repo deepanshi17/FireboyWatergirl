@@ -5,7 +5,7 @@
 // Jonathan Valvano
 // November 17, 2014
 
-
+#include <stdint.h> 
 void Sound_Init(void);
 void Sound_Play(const uint8_t *pt, uint32_t count);
 void Sound_Shoot(void);
@@ -17,4 +17,14 @@ void Sound_Fastinvader2(void);
 void Sound_Fastinvader3(void);
 void Sound_Fastinvader4(void);
 void Sound_Highpitch(void);
+
+void PlaySineWave (void); 
+
+void PlayGrunt(void) ;
+
+void PlayTing (void) ; 
+
+void PlayBackgroundMusic (void); 
+
+void PlayNothing (void); 
 
